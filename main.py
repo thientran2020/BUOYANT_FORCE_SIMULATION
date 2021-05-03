@@ -1,5 +1,6 @@
 from PyQt5 import QtCore, QtWidgets
 import sys
+import os
 
 # Main Window
 class BuoyantForceWindow(object):
@@ -10,7 +11,7 @@ class BuoyantForceWindow(object):
         self.title = QtWidgets.QLabel("BUOYANT FORCE SIMULATION", self.centralWidget)
 
         self.styleSheet = "color: white; font-size: 20px; font-family: Helvetica"
-        self.blockStyleSheet = "background-color: white; color: green;\
+        self.blockStyleSheet = "background-color: white; color: blue;\
                 font-family: Verdana; font-size: 20px; font-weight: bold"
         self.liquidStyleSheet = "background-color: white; color: red;\
                 font-family: Verdana; font-size: 18px; font-weight:bold"
@@ -21,9 +22,12 @@ class BuoyantForceWindow(object):
         self.lbHeight = 50              # Label Height
         self.lbWidth = 120              # Label Width
         self.lqHeight = 250             # Liquid Height
-        self.block_X = 790              # X_coordinate of the block
-        self.block_Y = 450              # Y_coordinate of the block
-        self.density_unit = "kg/  m3"   # SI Unit for Density
+        self.block_X = 630              # X_coordinate of the center of the block
+        self.block_Y = 450              # Y_coordinate of the center of the block
+        self.density_unit = "kg/m3"     # SI Unit for Density
+        self.g = 9.81                   # g = 9.81 m/s^2
+        self.block_raidus = 100
+        self.block_side = 100
 
         # Dictionaries for lists of liquid density and material density
         self.density_list = {"Water": ["997", "D4F1F9"], "Oil": ["950", "FFBF00"],
@@ -33,11 +37,19 @@ class BuoyantForceWindow(object):
         self.material_list = {"Wood": "99", "Iron": "7800", "Aluminum": "2700",
                               "Gold": "19300", "Platinum": "21400"}
 
-        # Menu File
+
+        # Menu Bar
         self.menuBar = QtWidgets.QMenuBar(MainWindow)
+
+        # Menu File
         self.menuFile = QtWidgets.QMenu(self.menuBar)
         self.exitAction = QtWidgets.QAction(MainWindow)
         self.clearAction = QtWidgets.QAction(MainWindow)
+
+        # Menu Help
+        self.menuHelp = QtWidgets.QMenu(self.menuBar)
+        self.analysisAction = QtWidgets.QAction(MainWindow)
+        self.textbookAction = QtWidgets.QAction(MainWindow)
 
         # Formula atrribute
         self.formula = QtWidgets.QLabel(self.centralWidget)
@@ -53,16 +65,25 @@ class BuoyantForceWindow(object):
         self.block = QtWidgets.QLabel(self.centralWidget)
         self.block_shape = QtWidgets.QLabel(self.centralWidget)
         self.block_shape_comboBox = QtWidgets.QComboBox(self.centralWidget)
+
         self.block_material = QtWidgets.QLabel(self.centralWidget)
         self.block_material_comboBox = QtWidgets.QComboBox(self.centralWidget)
+
         self.block_density = QtWidgets.QLabel(self.centralWidget)
         self.block_density_text = QtWidgets.QLabel(self.centralWidget)
 
-        # Attributes related to shapes of the block: Sphere & Cube
-        self.sphere_text = QtWidgets.QTextEdit(self.centralWidget)
-        self.cube_text = QtWidgets.QTextEdit(self.centralWidget)
-        self.sphere_button = QtWidgets.QPushButton(self.centralWidget)
-        self.cube_button = QtWidgets.QPushButton(self.centralWidget)
+        self.volume_ratio = QtWidgets.QLabel(self.centralWidget)
+
+        # Attributes for Sliders
+        self.volume_slider = QtWidgets.QSlider(QtCore.Qt.Horizontal, self.centralWidget)
+        self.volume_slider_text_start = QtWidgets.QLabel(self.centralWidget)
+        self.volume_slider_text_end = QtWidgets.QLabel(self.centralWidget)
+
+        self.density_slider = QtWidgets.QSlider(QtCore.Qt.Horizontal, self.centralWidget)
+        self.density_slider_text = QtWidgets.QLabel(self.centralWidget)
+
+        self.liquid_slider = QtWidgets.QSlider(QtCore.Qt.Horizontal, self.centralWidget)
+
 
     # Function to setup the main window
     # Call others function to support setup
@@ -75,12 +96,14 @@ class BuoyantForceWindow(object):
         self.setupTitle_Formula()
         self.setupLiquid()
         self.setupBlock()
+        self.setupSlider()
 
     # Function to setup Menu
     def setupMenuBar(self, MyWindow):
         MyWindow.setMenuBar(self.menuBar)
-        self.menuBar.setStyleSheet("font-size: 20px; color: red")
+        self.menuBar.setStyleSheet("font-size: 20px; color: white")
         self.menuBar.addAction(self.menuFile.menuAction())
+        self.menuBar.addAction(self.menuHelp.menuAction())
 
         self.menuFile.setTitle("File")
         self.menuFile.addAction(self.exitAction)
@@ -93,17 +116,36 @@ class BuoyantForceWindow(object):
         self.clearAction.setShortcut("Ctrl+C")
         self.clearAction.triggered.connect(lambda: self.clear())
 
+        self.menuHelp.setTitle("Help")
+        self.menuHelp.addAction(self.analysisAction)
+        self.analysisAction.setText("Analysis")
+        self.analysisAction.setShortcut('Ctrl+A')
+        self.analysisAction.triggered.connect(lambda: os.startfile("Analysis.docx"))
+
+        self.menuHelp.addAction(self.textbookAction)
+        self.textbookAction.setText("Textbook")
+        self.textbookAction.setShortcut('Ctrl+T')
+        self.textbookAction.triggered.connect(
+            lambda: os.startfile("https://openstax.org/books/university-physics-volume-1/pages/14-4-archimedes-principle-and-buoyancy")
+        )
+
     # Function to setup the Formula object
     # Create text, stylesheet, and set coordinates
     def setupTitle_Formula(self):
-        self.title.setStyleSheet("color: white; font-size: 36px;\
+        self.title.setStyleSheet("color: yellow; font-size: 40px;\
                                        font-family: Times New Roman; font-weight: bold")
-        self.title.setGeometry(QtCore.QRect(310, 20, 1000, 70))
+        self.title.setGeometry(QtCore.QRect(300, 20, 1000, 70))
 
-        self.formula.setText("F_buoyant = -pgV")
-        self.formula.setStyleSheet("color: yellow; font-size: 40px;\
-                  font-family: Times New Roman; font-style: italic; font-weight: bold")
-        self.formula.setGeometry(QtCore.QRect(770, 180, 400, 50))
+        self.formula.setText("F_b =  N")
+        self.formula.setStyleSheet("color: white; font-size: 40px;\
+                  font-family: Times New Roman; font-weight: bold")
+        self.formula.setGeometry(QtCore.QRect(770, 160, 400, 140))
+        self.formula.setAlignment(QtCore.Qt.AlignRight)
+
+        self.volume_ratio.setStyleSheet("background-color: black; color: yellow; font-size: 40px;\
+                  font-family: Times New Roman; font-weight: bold")
+        self.volume_ratio.setText(" Fraction = ")
+        self.volume_ratio.setGeometry(QtCore.QRect(self.wdWidth - 290, self.wdHeight - 70, 280, 60))
 
     # Function to setup liquid objects
     def setupLiquid(self):
@@ -120,7 +162,7 @@ class BuoyantForceWindow(object):
 
         self.liquid_comboBox.setGeometry(QtCore.QRect(180, 500, self.lbWidth + 40, self.lbHeight))
         self.liquid_comboBox.setStyleSheet(self.liquidStyleSheet)
-        self.liquid_comboBox.addItem("    ")
+        self.liquid_comboBox.addItem("")
         for item in self.density_list.keys():
             self.liquid_comboBox.addItem(item)
         self.liquid_comboBox.activated.connect(self.liquidClicked)
@@ -130,7 +172,7 @@ class BuoyantForceWindow(object):
         self.liquid_density.setGeometry(QtCore.QRect(30, 570, self.lbWidth, self.lbHeight))
         self.liquid_density.setAlignment(QtCore.Qt.AlignCenter)
 
-        self.liquid_density_text.setText(" ")
+        self.liquid_density_text.setText("")
         self.liquid_density_text.setStyleSheet(self.liquidStyleSheet)
         self.liquid_density_text.setGeometry(QtCore.QRect(180, 570, self.lbWidth + 40, self.lbHeight))
         self.liquid_density_text.setAlignment(QtCore.Qt.AlignCenter)
@@ -149,31 +191,10 @@ class BuoyantForceWindow(object):
 
         self.block_shape_comboBox.setGeometry(QtCore.QRect(x_pos, y_pos, self.lbWidth, self.lbHeight))
         self.block_shape_comboBox.setStyleSheet(self.liquidStyleSheet)
-        self.block_shape_comboBox.addItem("    ")
+        self.block_shape_comboBox.addItem("")
         self.block_shape_comboBox.addItem("Sphere")
         self.block_shape_comboBox.addItem("Cube")
         self.block_shape_comboBox.activated.connect(self.shapeClicked)
-
-        self.sphere_text.setText("")
-        self.sphere_text.setPlaceholderText("R = 140 m")
-        self.sphere_text.setStyleSheet(self.blockStyleSheet)
-        self.sphere_text.setGeometry(QtCore.QRect(x_pos + offset_x, y_pos, self.lbWidth + 10, self.lbHeight))
-        self.sphere_text.setVisible(False)
-
-        self.sphere_button.setGeometry(QtCore.QRect(x_pos + 2*offset_x, y_pos, bt_height, self.lbHeight))
-        self.sphere_button.setStyleSheet("background-color: yellow")
-        self.sphere_button.setVisible(False)
-        self.sphere_button.clicked.connect(lambda: self.changeSize("Sphere"))
-
-        self.cube_text.setText("")
-        self.cube_text.setPlaceholderText("S = 140 m")
-        self.cube_text.setStyleSheet(self.blockStyleSheet)
-        self.cube_text.setGeometry(QtCore.QRect(x_pos + offset_x, y_pos, self.lbWidth + 10, self.lbHeight))
-        self.cube_text.setVisible(False)
-        self.cube_button.setGeometry(QtCore.QRect(x_pos + 2*offset_x, y_pos, bt_height, self.lbHeight))
-        self.cube_button.setStyleSheet("background-color: yellow")
-        self.cube_button.setVisible(False)
-        self.cube_button.clicked.connect(lambda: self.changeSize(self.block_shape_comboBox.currentText()))
 
         self.block_material.setText("BLOCK MATERIAL")
         self.block_material.setStyleSheet(self.blockStyleSheet)
@@ -182,7 +203,7 @@ class BuoyantForceWindow(object):
 
         self.block_material_comboBox.setGeometry(QtCore.QRect(320, 240, self.lbWidth, self.lbHeight))
         self.block_material_comboBox.setStyleSheet(self.liquidStyleSheet)
-        self.block_material_comboBox.addItem("    ")
+        self.block_material_comboBox.addItem("")
         for item in self.material_list.keys():
             self.block_material_comboBox.addItem(item)
         self.block_material_comboBox.activated.connect(self.materialClicked)
@@ -192,10 +213,56 @@ class BuoyantForceWindow(object):
         self.block_density.setGeometry(QtCore.QRect(30, 320, self.lbWidth * 2, self.lbHeight))
         self.block_density.setAlignment(QtCore.Qt.AlignCenter)
 
-        self.block_density_text.setText(" ")
+        self.block_density_text.setText("")
         self.block_density_text.setStyleSheet(self.liquidStyleSheet)
         self.block_density_text.setGeometry(QtCore.QRect(320, 320, self.lbWidth * 2, self.lbHeight))
         self.block_density_text.setAlignment(QtCore.Qt.AlignCenter)
+
+        self.volume_slider.valueChanged.connect(self.slideVolume)
+        self.volume_slider.sliderPressed.connect(self.slideVolume)
+        self.density_slider.valueChanged.connect(self.slideDensity)
+        self.liquid_slider.valueChanged.connect(self.slideLiquid)
+
+    def setupSlider(self):
+        self.volume_slider.setGeometry(490, 170, 230, 25)
+        self.volume_slider.setMinimum(1)
+        self.volume_slider.setMaximum(100)
+        self.volume_slider.setValue(50)
+
+        self.volume_slider_text_start.move(470, 200)
+        self.volume_slider_text_start.setText("1 cm3")
+        self.volume_slider_text_start.setStyleSheet(self.styleSheet)
+
+        self.volume_slider_text_end.move(690, 200)
+        self.volume_slider_text_end.setText("1 m3")
+        self.volume_slider_text_end.setStyleSheet(self.styleSheet)
+
+        self.density_slider.setGeometry(320, 390, 230, 25)
+        self.density_slider.setMinimum(1)
+        self.density_slider.setMaximum(100)
+        self.density_slider.setValue(50)
+
+        self.density_slider_text.move(320, 410)
+        self.density_slider_text.setText("kg/m3")
+        self.density_slider_text.setStyleSheet(self.styleSheet)
+
+        self.liquid_slider.setGeometry(64, 640, 240, 25)
+        self.liquid_slider.setMinimum(1)
+        self.liquid_slider.setMaximum(100)
+        self.liquid_slider.setValue(50)
+
+    def createShape(self, side = None, radius = None, posX = None, posY = None):
+        if not posX and not posY:
+            posX, posY = self.block_X, self.block_Y
+        if radius is not None:
+            self.block_radius = radius
+            self.block.move(posX, posY - radius)
+            self.block.resize(radius * 2, radius * 2)
+            self.block.setStyleSheet("background-color: green; border-radius: " + str(radius))
+        elif side is not None:
+            self.block_side = side
+            self.block.setStyleSheet("background-color: green;")
+            self.block.setGeometry(QtCore.QRect(posX, posY - side // 3, side, side))
 
     # Clicked event handling when we change the material of the block
     def materialClicked(self):
@@ -204,8 +271,9 @@ class BuoyantForceWindow(object):
             self.block_density_text.setText(
                 self.material_list[typ] + " " + str(self.density_unit)
             )
+            self.density_slider.setValue(50)
         else:
-            self.block_density_text.setText(" ")
+            self.block_density_text.setText("")
 
     # Liquid event handling when we change the liquid that the object immersered
     def liquidClicked(self):
@@ -215,62 +283,118 @@ class BuoyantForceWindow(object):
                 self.density_list[typ][0] + " " + str(self.density_unit)
             )
             self.liquid_background.setStyleSheet("background-color: #" + self.density_list[typ][1])
+            self.liquid_slider.setValue(50)
         else:
-            self.liquid_density_text.setText(" ")
+            self.liquid_density_text.setText("")
 
-    # Clicked event handling when we change the shape of the block
-    # Either display Sphere or Rectangle object
     def shapeClicked(self):
-        if self.block_shape_comboBox.currentIndex() != 0:
+        idx = self.block_shape_comboBox.currentIndex()
+        if  idx != 0:
+            self.block.setVisible(True)
             shape = self.block_shape_comboBox.currentText()
-            self.adjustShape(shape)
             if shape == "Sphere":
-                self.sphere_text.setVisible(True)
-                self.sphere_button.setVisible(True)
-                self.cube_text.setText("")
-                self.cube_text.setVisible(False)
+                self.createShape(radius = self.volume_slider.value()*2 - 10)
             elif shape == "Cube":
-                self.cube_text.setVisible(True)
-                self.cube_button.setVisible(True)
-                self.sphere_text.setText("")
-                self.sphere_text.setVisible(False)
+                self.createShape(side = self.volume_slider.value()*3)
         else:
-            self.sphere_text.setText("")
-            self.sphere_text.setVisible(False)
-            self.sphere_button.setVisible(False)
-            self.cube_text.setText("")
-            self.cube_text.setVisible(False)
-            self.cube_button.setVisible(False)
-        self.block.setVisible(True)
+            self.clearBlock()
 
-    # Button event handling we adjust the size for the shape of the current block
-    # Default size: R = 140 for Sphere and SIDE = 140 for Box
-    def adjustShape(self, shape, size=140):
-        if shape == "Sphere":
-            self.block.move(self.block_X, self.block_Y - size)
-            self.block.resize(size*2, size*2)
-            self.block.setStyleSheet("background-color: green; border-radius: " + str(size))
-        elif shape == "Cube":
-            self.block.setStyleSheet("background-color: green;")
-            self.block.setGeometry(QtCore.QRect(self.block_X, self.block_Y - size//2, size, size))
+    def slideVolume(self):
+        condition = self.condition()
+        F_buoyant = "0.0"
+        if condition == "FLOAT":
+            V = self.volume_slider.value() / 100
+            material = self.block_material_comboBox.currentText()
+            if material in self.material_list:
+                p_object = float(self.material_list[material])
+                F_buoyant = "{:.2f}".format(V * p_object * self.g)
 
-    def changeSize(self, shape):
-        size = "140"
-        if shape == "Cube":
-            size = self.cube_text.toPlainText()
-        elif shape == "Sphere":
-            size = self.sphere_text.toPlainText()
-        if size.isdigit():
-            self.adjustShape(shape, int(size))
+            self.volume_ratio.setText(" Fraction = " + "{:.2f}".format(self.getFraction()))
+            self.shapeClicked()
+        elif condition == "IMMERSE":
+            self.makeImmersed()
+        self.formula.setText("F_b = " + F_buoyant + " N")
+
+    def slideDensity(self, offset = 5):
+        if self.block_density_text.text() == "" or self.condition() == "IMMERSE":
+            return
+        density = int(self.material_list[self.block_material_comboBox.currentText()])
+        slider_dist = self.density_slider.value() - 50
+        offset_density = max(density + offset*slider_dist, 0)
+
+        self.block_density_text.setText(str(offset_density) + " " + str(self.density_unit))
+        self.moveBlock(slider_dist)
+        self.sliding(self.getFraction())
+
+    def slideLiquid(self, offset = 5):
+        if self.liquid_density_text.text() == "" or self.liquid_comboBox.currentText() == "" \
+                or self.condition() == "IMMERSE":
+            return
+        density = int(self.density_list[self.liquid_comboBox.currentText()][0])
+        slider_dist = self.liquid_slider.value() - 50
+        offset_density = max(density + offset*slider_dist, 0)
+
+        self.liquid_density_text.setText(str(offset_density) + " " + str(self.density_unit))
+        self.moveBlock(-slider_dist)
+        self.sliding(self.getFraction())
+
+    def moveBlock(self, offsetY):
+        if self.block_shape_comboBox.currentText() == "Cube":
+            current_X, current_Y = self.block_X, self.block_Y - self.block_side // 2
+        elif self.block_shape_comboBox.currentText() == "Sphere":
+            current_X, current_Y = self.block_X, self.block_Y - self.block_radius
+        self.block.move(current_X, current_Y + offsetY)
+
+    def condition(self):
+        liquid = self.liquid_comboBox.currentText()
+        block = self.block_material_comboBox.currentText()
+        if  liquid == "" or block == "":
+            return "NO"
+
+        p_liquid = float(self.density_list[liquid][0])
+        p_block = float(self.material_list[block])
+        if p_block < p_liquid:
+            return "FLOAT"
+        return "IMMERSE"
+
+    def getFraction(self):
+        if self.block_material_comboBox.currentIndex() == 0 or self.liquid_comboBox.currentIndex() == 0:
+            return ""
+        p_object = float(self.block_density_text.text().split(" ")[0])
+        p_liquid = float(self.liquid_density_text.text().split(" ")[0])
+        return max(p_object / p_liquid, 0)
+
+    def makeImmersed(self):
+        offsetY = self.block.size().height() + 10
+        self.block.move(self.block_X, self.wdHeight - offsetY)
+        self.volume_ratio.setText("  Fraction =  1")
+
+    def sliding(self, fraction):
+        if 0 < fraction < 1:
+            self.block.setVisible(True)
+            self.volume_ratio.setText(" Fraction = " + "{:.2f}".format(self.getFraction()))
+        elif fraction == 0:
+            self.block.setVisible(False)
+        else:
+            self.makeImmersed()
+
+    def clearBlock(self):
+        self.block_material_comboBox.setCurrentIndex(0)
+        self.block_shape_comboBox.setCurrentIndex(0)
+        self.materialClicked()
+        self.volume_slider.setValue(50)
+        self.density_slider.setValue(50)
+        self.formula.setText("F_b =  N")
+        self.volume_ratio.setText(" Fraction =  ")
+        self.block.setVisible(False)
+
+    def clearLiquid(self):
+        self.liquid_comboBox.setCurrentIndex(0)
+        self.liquid_density_text.setText("")
 
     def clear(self):
-        self.block_material_comboBox.setCurrentIndex(0)
-        self.liquid_comboBox.setCurrentIndex(0)
-        self.block_shape_comboBox.setCurrentIndex(0)
-        self.shapeClicked()
-        self.materialClicked()
-        self.liquidClicked()
-        self.block.setVisible(False)
+        self.clearBlock()
+        self.clearLiquid()
 
 
 if __name__ == "__main__":
