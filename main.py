@@ -10,51 +10,70 @@ class BuoyantForceWindow(object):
         self.centralWidget = QtWidgets.QWidget(MainWindow)
         self.title = QtWidgets.QLabel("BUOYANT FORCE SIMULATION", self.centralWidget)
 
+        # Default style for central widget, block object and liquid object
         self.styleSheet = "color: white; font-size: 20px; font-family: Helvetica"
         self.blockStyleSheet = "background-color: white; color: blue;\
                 font-family: Verdana; font-size: 20px; font-weight: bold"
         self.liquidStyleSheet = "background-color: white; color: red;\
                 font-family: Verdana; font-size: 18px; font-weight:bold"
 
-        # Define some default sizes
-        self.wdHeight = 700             # Window Height
+        # Default values
+        self.wdHeight = 740             # Window Height
         self.wdWidth = 1200             # Window Width
         self.lbHeight = 50              # Label Height
         self.lbWidth = 120              # Label Width
-        self.lqHeight = 250             # Liquid Height
+        self.lqHeight = 270             # Liquid Height
         self.block_X = 630              # X_coordinate of the center of the block
         self.block_Y = 450              # Y_coordinate of the center of the block
         self.density_unit = "kg/m3"     # SI Unit for Density
         self.g = 9.81                   # g = 9.81 m/s^2
-        self.block_raidus = 100
-        self.block_side = 100
+        self.block_raidus = 100         # default radius for sphere
+        self.block_side = 100           # default side for cube
 
-        # Dictionaries for lists of liquid density and material density
+        # Dictionaries for lists of liquid density
+        # {"liquid": ["density", "color in hex"]}
         self.density_list = {"Water": ["997", "D4F1F9"], "Oil": ["950", "FFBF00"],
                              "Sea Water": ["1020", "006994"],"Milk": ["1027", "FDFFF5"],
                              "Alcohol": ["789", "FFFFFF"], "Mercury": ["13593", "D5D2D1"],
                              "Honey": ["1360", "C58F00"]}
+
+        # Dictionaries for lists of block density
         self.material_list = {"Wood": "99", "Iron": "7800", "Aluminum": "2700",
                               "Gold": "19300", "Platinum": "21400"}
-
 
         # Menu Bar
         self.menuBar = QtWidgets.QMenuBar(MainWindow)
 
         # Menu File
+        # Include 2 actions:
+        # @exit    TODO: quit the app
+        # @clear   TODO: clear current set up
         self.menuFile = QtWidgets.QMenu(self.menuBar)
         self.exitAction = QtWidgets.QAction(MainWindow)
         self.clearAction = QtWidgets.QAction(MainWindow)
 
         # Menu Help
+        # Include 4 actions:
+        # @analysic    TODO: open file analysis.docx
+        # @textbook    TODO: open textbook website (Physics - OpenStax)
+        # @video       TODO: open video for visualization
+        # @about       TODO: open README.md
         self.menuHelp = QtWidgets.QMenu(self.menuBar)
         self.analysisAction = QtWidgets.QAction(MainWindow)
         self.textbookAction = QtWidgets.QAction(MainWindow)
+        self.videoAction = QtWidgets.QAction(MainWindow)
+        self.aboutAction = QtWidgets.QAction(MainWindow)
 
-        # Formula atrribute
+        # Formula label
+        # TODO: display the manigtude buoyant force exerting on the object
         self.formula = QtWidgets.QLabel(self.centralWidget)
 
         # Attributes related to liquid
+        # @liquid_background    TODO: display liqud color
+        # @liquid_label         TODO: label "LIQUID"
+        # @liquid_comboBox      TODO: combobox - list of liquids (water, oil, ...)
+        # @liquid_density       TODO: label "DENSITY"
+        # @liquid_density_text  TODO: display corresponding density with chosen liquid
         self.liquid_background = QtWidgets.QTextEdit(self.centralWidget)
         self.liquid_label = QtWidgets.QLabel(self.centralWidget)
         self.liquid_comboBox = QtWidgets.QComboBox(self.centralWidget)
@@ -62,31 +81,39 @@ class BuoyantForceWindow(object):
         self.liquid_density_text = QtWidgets.QLabel(self.centralWidget)
 
         # Attributes related to block
+        # @block                    TODO: block object (either a cube or sphere in 2D)
+        # @block_shape              TODO: label "BLOCK SHAPE"
+        # @block_shape_comboBox     TODO: combobox - list of shapes (cube, sphere)
+        # @block_material           TODO: label "BLOCK MATERIAL"
+        # @block_material_comboBox  TODO: combobox - list of material (wood, iron, ...)
+        # @block_density            TODO: label "BLOCK DENSITY"
+        # @block_density_text       TODO: display corresponding density with chosen material
+        # @volume_ratio             TODO: display fraction submerged V_sub / V_total
         self.block = QtWidgets.QLabel(self.centralWidget)
         self.block_shape = QtWidgets.QLabel(self.centralWidget)
         self.block_shape_comboBox = QtWidgets.QComboBox(self.centralWidget)
-
         self.block_material = QtWidgets.QLabel(self.centralWidget)
         self.block_material_comboBox = QtWidgets.QComboBox(self.centralWidget)
-
         self.block_density = QtWidgets.QLabel(self.centralWidget)
         self.block_density_text = QtWidgets.QLabel(self.centralWidget)
-
         self.volume_ratio = QtWidgets.QLabel(self.centralWidget)
 
         # Attributes for Sliders
+        # @volume_slider                TODO: slider to increase or decrease volume of block
+        # @volume_slider_text_start     TODO: minimum value for volume: 1 cm^3
+        # @volume_slider_text_end       TODO: maximum value for volume: 1 m^3
+        # @density_slider               TODO: slider to increase or decrease density of block
+        # @density_slider_text          TODO: unit for density kg/m^3
+        # @liquid_slider                TODO: slider to increase or decrease density of liquid
         self.volume_slider = QtWidgets.QSlider(QtCore.Qt.Horizontal, self.centralWidget)
         self.volume_slider_text_start = QtWidgets.QLabel(self.centralWidget)
         self.volume_slider_text_end = QtWidgets.QLabel(self.centralWidget)
-
         self.density_slider = QtWidgets.QSlider(QtCore.Qt.Horizontal, self.centralWidget)
         self.density_slider_text = QtWidgets.QLabel(self.centralWidget)
-
         self.liquid_slider = QtWidgets.QSlider(QtCore.Qt.Horizontal, self.centralWidget)
 
-
-    # Function to setup the main window
-    # Call others function to support setup
+    # TODO: Setup the main window
+    # TODO: Call others function to support setup
     def setupUI(self, MyWindow):
         MyWindow.setFixedSize(self.wdWidth, self.wdHeight)
         MyWindow.setWindowTitle("BUOYANT FORCE")
@@ -98,12 +125,18 @@ class BuoyantForceWindow(object):
         self.setupBlock()
         self.setupSlider()
 
-    # Function to setup Menu
+    # TODO: Setup Menu Bar
+    # TODO: Set StyleSheet - Set Text - Add action - Event Handling
     def setupMenuBar(self, MyWindow):
         MyWindow.setMenuBar(self.menuBar)
         self.menuBar.setStyleSheet("font-size: 20px; color: white")
         self.menuBar.addAction(self.menuFile.menuAction())
         self.menuBar.addAction(self.menuHelp.menuAction())
+
+        self.menuFile.addAction(self.clearAction)
+        self.clearAction.setText("Clear")
+        self.clearAction.setShortcut("Ctrl+C")
+        self.clearAction.triggered.connect(lambda: self.clear())
 
         self.menuFile.setTitle("File")
         self.menuFile.addAction(self.exitAction)
@@ -111,12 +144,12 @@ class BuoyantForceWindow(object):
         self.exitAction.setShortcut('Ctrl+Q')
         self.exitAction.triggered.connect(lambda: sys.exit(app.exec_()))
 
-        self.menuFile.addAction(self.clearAction)
-        self.clearAction.setText("Clear")
-        self.clearAction.setShortcut("Ctrl+C")
-        self.clearAction.triggered.connect(lambda: self.clear())
-
         self.menuHelp.setTitle("Help")
+        self.menuHelp.addAction(self.videoAction)
+        self.videoAction.setText("Visualization")
+        self.videoAction.setShortcut('Ctrl+V')
+        self.videoAction.triggered.connect(lambda: os.startfile("video.mp4"))
+
         self.menuHelp.addAction(self.analysisAction)
         self.analysisAction.setText("Analysis")
         self.analysisAction.setShortcut('Ctrl+A')
@@ -128,9 +161,12 @@ class BuoyantForceWindow(object):
         self.textbookAction.triggered.connect(
             lambda: os.startfile("https://openstax.org/books/university-physics-volume-1/pages/14-4-archimedes-principle-and-buoyancy")
         )
+        self.menuHelp.addAction(self.aboutAction)
+        self.aboutAction.setText("About Us")
+        self.aboutAction.triggered.connect(lambda: os.startfile("README.md"))
 
-    # Function to setup the Formula object
-    # Create text, stylesheet, and set coordinates
+    # TODO: Setup Title, Formula Label and Volume_Ratio Label
+    # TODO: Create text - Set stylesheet and coordinates
     def setupTitle_Formula(self):
         self.title.setStyleSheet("color: yellow; font-size: 40px;\
                                        font-family: Times New Roman; font-weight: bold")
@@ -147,7 +183,8 @@ class BuoyantForceWindow(object):
         self.volume_ratio.setText(" Fraction = ")
         self.volume_ratio.setGeometry(QtCore.QRect(self.wdWidth - 290, self.wdHeight - 70, 280, 60))
 
-    # Function to setup liquid objects
+    # TODO: Setup 5 liquid objects
+    # TODO: Create text - Set stylesheet and coordinates
     def setupLiquid(self):
         self.liquid_background.setGeometry(
             QtCore.QRect(0, self.wdHeight - self.lqHeight, self.wdWidth, self.lqHeight)
@@ -177,7 +214,8 @@ class BuoyantForceWindow(object):
         self.liquid_density_text.setGeometry(QtCore.QRect(180, 570, self.lbWidth + 40, self.lbHeight))
         self.liquid_density_text.setAlignment(QtCore.Qt.AlignCenter)
 
-    # Function to setup the block
+    # TODO: Setup 6 blocks objects
+    # TODO: Create text - Set stylesheet and coordinates
     def setupBlock(self):
         x_pos = 320
         y_pos = 160
@@ -218,16 +256,15 @@ class BuoyantForceWindow(object):
         self.block_density_text.setGeometry(QtCore.QRect(320, 320, self.lbWidth * 2, self.lbHeight))
         self.block_density_text.setAlignment(QtCore.Qt.AlignCenter)
 
-        self.volume_slider.valueChanged.connect(self.slideVolume)
-        self.volume_slider.sliderPressed.connect(self.slideVolume)
-        self.density_slider.valueChanged.connect(self.slideDensity)
-        self.liquid_slider.valueChanged.connect(self.slideLiquid)
-
+    # TODO: Setup 3 main sliders objects (and its supported objects)
+    # TODO: Create text - Set stylesheet and coordinates - Event Handling
     def setupSlider(self):
         self.volume_slider.setGeometry(490, 170, 230, 25)
         self.volume_slider.setMinimum(1)
         self.volume_slider.setMaximum(100)
         self.volume_slider.setValue(50)
+        self.volume_slider.valueChanged.connect(self.slideVolume)
+        self.volume_slider.sliderPressed.connect(self.slideVolume)
 
         self.volume_slider_text_start.move(470, 200)
         self.volume_slider_text_start.setText("1 cm3")
@@ -241,6 +278,7 @@ class BuoyantForceWindow(object):
         self.density_slider.setMinimum(1)
         self.density_slider.setMaximum(100)
         self.density_slider.setValue(50)
+        self.density_slider.valueChanged.connect(self.slideDensity)
 
         self.density_slider_text.move(320, 410)
         self.density_slider_text.setText("kg/m3")
@@ -250,7 +288,12 @@ class BuoyantForceWindow(object):
         self.liquid_slider.setMinimum(1)
         self.liquid_slider.setMaximum(100)
         self.liquid_slider.setValue(50)
+        self.liquid_slider.valueChanged.connect(self.slideLiquid)
 
+    # TODO: Display block (either cube or sphere depending what values passed)
+    # @side             TODO: side of the cube
+    # @radius           TODO: radius of the sphere
+    # @(posX, posY)     TODO: coordinates of the center of the block
     def createShape(self, side = None, radius = None, posX = None, posY = None):
         if not posX and not posY:
             posX, posY = self.block_X, self.block_Y
@@ -264,7 +307,7 @@ class BuoyantForceWindow(object):
             self.block.setStyleSheet("background-color: green;")
             self.block.setGeometry(QtCore.QRect(posX, posY - side // 3, side, side))
 
-    # Clicked event handling when we change the material of the block
+    # TODO: Clicked event handling when we change the material of the block
     def materialClicked(self):
         if self.block_material_comboBox.currentIndex() != 0:
             typ = self.block_material_comboBox.currentText()
@@ -275,7 +318,7 @@ class BuoyantForceWindow(object):
         else:
             self.block_density_text.setText("")
 
-    # Liquid event handling when we change the liquid that the object immersered
+    # TODO: Liquid event handling when we change the liquid that the object immersered
     def liquidClicked(self):
         if self.liquid_comboBox.currentIndex() != 0:
             typ = self.liquid_comboBox.currentText()
@@ -287,6 +330,7 @@ class BuoyantForceWindow(object):
         else:
             self.liquid_density_text.setText("")
 
+    # TODO: Shape event handling when we change the shape of the block (cube or sphere)
     def shapeClicked(self):
         idx = self.block_shape_comboBox.currentIndex()
         if  idx != 0:
@@ -299,6 +343,43 @@ class BuoyantForceWindow(object):
         else:
             self.clearBlock()
 
+    # TODO: Check if there is buoyant force exerting on the block and return current condition
+    # TODO: Return "NO" if not enough information, "FLOAT" if yes and "IMMERSE" if no
+    def condition(self):
+        liquid = self.liquid_comboBox.currentText()
+        block = self.block_material_comboBox.currentText()
+        if  liquid == "" or block == "":
+            return "NO"
+        p_liquid = float(self.density_list[liquid][0])
+        p_block = float(self.material_list[block])
+        if p_block < p_liquid:
+            return "FLOAT"
+        return "IMMERSE"
+
+    # TODO: Return fraction submerged = V_submerged / V_total
+    def getFraction(self):
+        if self.block_material_comboBox.currentIndex() == 0 or self.liquid_comboBox.currentIndex() == 0:
+            return ""
+        p_object = float(self.block_density_text.text().split(" ")[0])
+        p_liquid = float(self.liquid_density_text.text().split(" ")[0])
+        return max(p_object / p_liquid, 0)
+
+    # TODO: Move block all the way down into the liquid to display "IMMERSE" condition
+    def makeImmersed(self):
+        offsetY = self.block.size().height() + 10
+        self.block.move(self.block_X, self.wdHeight - offsetY)
+        self.volume_ratio.setText("  Fraction =  1")
+
+    # TODO: Move the block vertically by @offsetY
+    def moveBlock(self, offsetY):
+        if self.block_shape_comboBox.currentText() == "Cube":
+            current_X, current_Y = self.block_X, self.block_Y - self.block_side // 2
+        elif self.block_shape_comboBox.currentText() == "Sphere":
+            current_X, current_Y = self.block_X, self.block_Y - self.block_radius
+        self.block.move(current_X, current_Y + offsetY)
+
+    # TODO: Event handling for volume sliders
+    # TODO: Update the buoyant force and size of block
     def slideVolume(self):
         condition = self.condition()
         F_buoyant = "0.0"
@@ -315,6 +396,8 @@ class BuoyantForceWindow(object):
             self.makeImmersed()
         self.formula.setText("F_b = " + F_buoyant + " N")
 
+    # TODO: Event handling for block density sliders
+    # TODO: Update the fraction submerged and new position of block (floated, immersed)
     def slideDensity(self, offset = 5):
         if self.block_density_text.text() == "" or self.condition() == "IMMERSE":
             return
@@ -326,6 +409,8 @@ class BuoyantForceWindow(object):
         self.moveBlock(slider_dist)
         self.sliding(self.getFraction())
 
+    # TODO: Event handling for liquid density sliders
+    # TODO: Update the fraction submerged and new position of block (floated, immersed)
     def slideLiquid(self, offset = 5):
         if self.liquid_density_text.text() == "" or self.liquid_comboBox.currentText() == "" \
                 or self.condition() == "IMMERSE":
@@ -338,37 +423,7 @@ class BuoyantForceWindow(object):
         self.moveBlock(-slider_dist)
         self.sliding(self.getFraction())
 
-    def moveBlock(self, offsetY):
-        if self.block_shape_comboBox.currentText() == "Cube":
-            current_X, current_Y = self.block_X, self.block_Y - self.block_side // 2
-        elif self.block_shape_comboBox.currentText() == "Sphere":
-            current_X, current_Y = self.block_X, self.block_Y - self.block_radius
-        self.block.move(current_X, current_Y + offsetY)
-
-    def condition(self):
-        liquid = self.liquid_comboBox.currentText()
-        block = self.block_material_comboBox.currentText()
-        if  liquid == "" or block == "":
-            return "NO"
-
-        p_liquid = float(self.density_list[liquid][0])
-        p_block = float(self.material_list[block])
-        if p_block < p_liquid:
-            return "FLOAT"
-        return "IMMERSE"
-
-    def getFraction(self):
-        if self.block_material_comboBox.currentIndex() == 0 or self.liquid_comboBox.currentIndex() == 0:
-            return ""
-        p_object = float(self.block_density_text.text().split(" ")[0])
-        p_liquid = float(self.liquid_density_text.text().split(" ")[0])
-        return max(p_object / p_liquid, 0)
-
-    def makeImmersed(self):
-        offsetY = self.block.size().height() + 10
-        self.block.move(self.block_X, self.wdHeight - offsetY)
-        self.volume_ratio.setText("  Fraction =  1")
-
+    # TODO: Event handling for changing density (either liquid or block)
     def sliding(self, fraction):
         if 0 < fraction < 1:
             self.block.setVisible(True)
@@ -378,6 +433,7 @@ class BuoyantForceWindow(object):
         else:
             self.makeImmersed()
 
+    # TODO: Clear all chosen information for block
     def clearBlock(self):
         self.block_material_comboBox.setCurrentIndex(0)
         self.block_shape_comboBox.setCurrentIndex(0)
@@ -388,10 +444,12 @@ class BuoyantForceWindow(object):
         self.volume_ratio.setText(" Fraction =  ")
         self.block.setVisible(False)
 
+    # TODO: Clear all chosen information for liquid
     def clearLiquid(self):
         self.liquid_comboBox.setCurrentIndex(0)
         self.liquid_density_text.setText("")
 
+    # TODO: Event handling for Clear action on Menu File
     def clear(self):
         self.clearBlock()
         self.clearLiquid()
