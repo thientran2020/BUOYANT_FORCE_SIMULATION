@@ -1,3 +1,7 @@
+# @Author:          Thien Tran
+# @Purpose:         Final Project for Physics 4C - Spring 2021 (EVC)
+# @Description:     Simple Buoyant Force Simulation App
+
 from PyQt5 import QtCore, QtWidgets
 import sys
 import os
